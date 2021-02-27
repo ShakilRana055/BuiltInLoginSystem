@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BuiltInLoginSystem.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,26 +23,37 @@ namespace BuiltInLoginSystem.Controllers
         {
             return View();
         }
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Login(RegisterVM registerVM)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(string returnUrl, RegisterVM registerVM )
         {
             var result = await signInManager.PasswordSignInAsync(registerVM.Email, registerVM.Password, registerVM.RememberMe, false);
             if (result.Succeeded)
             {
-                return RedirectToAction("index", "home");
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                else
+                {
+                    return RedirectToAction("index", "home");
+                }
             }
             ModelState.AddModelError("", "Invalid Login Attempt");
             return View();
         }
+        [AllowAnonymous]
         public IActionResult Register()
         {
             return View();
         }
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterVM registerVM)
         {
             if (ModelState.IsValid)
